@@ -5,9 +5,9 @@
 #date			: 20160620
 #version		: 0.1    
 #usage			: bash 60-lastlogin OR ./60-lastlogin
-#notes			: It's colorful, be aware that some apps needs to be installed, see depencies
+#notes			: It's colorful, be aware that some apps needs to be installed, see dependencies
 #bash_version	: 4.3.30(1)-release
-#depencies		: rev (sudo apt-get install rev)
+#dependencies	: rev (sudo apt-get install rev)
 #installation	: chmod +x 60-lastlogin | mv 60-lastlogin /etc/update-motd.d/60-lastlogin
 #license		: GPLv3
 #==============================================================================

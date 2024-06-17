@@ -1,14 +1,23 @@
 # update-motd.d
 
-Hello this is our /etc/update-motd.d folder. You can download it in your distribution with the git command
+Hi there!
+
+Welcome to our `/etc/update-motd.d` folder.
+
+You all know what the `/etc/motd` (Message of the Day) file is: since time immemorial, all Unixes print it during login, and they're 
+
+Contemporary Unix systems 
+
+
+You can download it in your Unix distribution with the git command
 ```shell
 git clone https://github.com/SHelfinger/update-motd.d/ ~/
 ```
-This command will add the complete git repo inside your home folder (`cd ~/`)
+This command will add the complete git repo inside your home folder (`cd ~/`).
 
-Usually you have already the chmod +x on all files, but when this isn't please make them executionable (`chmod +x *-*`) inside the folder.
+Usually you will already have the executable bit set on all files in that folder, but when this isn't the case, please make them executable (`chmod +x *-*`) inside the folder.
 
-As you are done with testing each .sh file (`./10-version` etc) feel free to install it
+After you're done with testing each file (`./10-version` etc), feel free to install the ones you wish by copying them to their final destination:
 ```shell
 cp 10-version /etc/update-motd.d/10-version
 cp 20-cpu /etc/update-motd.d/20-cpu
@@ -18,7 +27,9 @@ cp 40-memory /etc/update-motd.d/40-memory
 cp 50-lastlogin /etc/update-motd.d/50-lastlogin
 cp 90-fail2ban /etc/update-motd.d/90-fail2ban
 ```
-(Remember on some .sh files you need special programs, usually bc and crudini)
+Note that some of those files have dependencies, such as `lm-sensors`, `bc` and `crudini`. Each lists its dependencies (beyond the standard Unix utilities, e.g. `awk`, `cut`, `tr`, `grep`, etc.) — make sure you install them all first (or skip the file if you don't want some of the functionality).
+
+Some of the files use Python for short one-liners. Python 2 is assumed, but some tweaks have been made to allow the scripts to run under 
 
 Now we need to tell your SSH Daemon that he needs to get the `/run/motd` file.
 

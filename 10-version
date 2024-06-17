@@ -5,9 +5,9 @@
 #date			: 20160620
 #version		: 0.1    
 #usage			: bash 10-version OR ./10-version
-#notes			: It's colorful, be aware that some apps needs to be installed, see depencies
+#notes			: It's colorful, be aware that some apps needs to be installed, see dependencies
 #bash_version	: 4.3.30(1)-release
-#depencies		: Nothing (Normal Installation)
+#dependencies	: Nothing (Normal Installation)
 #installation	: chmod +x 10-version | mv 10-version /etc/update-motd.d/10-version
 #license		: GPLv3
 #==============================================================================

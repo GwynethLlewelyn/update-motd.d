@@ -1,0 +1,27 @@
+#!/bin/bash
+#title			: /etc/update-motd.d/00-header
+#description	: Outputs a banner (large print) of the hostname.
+#author			: gwynethllewelyn
+#date			: 20240617
+#version		: 0.1
+#usage			: bash 00-header OR ./00-header
+#notes			: Some apps needs to be installed, see dependencies
+#bash_version	: 4.3.30(1)-release
+#dependencies	: figlet or toilet; optionally more ASCII fonts!
+#				  (sudo apt-get figlet or sudo apt-get toilet)
+#installation	: chmod +x 00-header | mv 00-header /etc/update-motd.d/00-header
+#license		: GPLv3
+#==============================================================================
+
+# Both figlet and toilet support a "standard font":
+FONT=standard
+# I fancy a font inspired on the game Doom. A full list of fonts can be
+#FONT=doom
+PRINT_HOSTNAME=$(which hostname)
+
+BANNER=$(which toilet)
+if [ -z "$BANNER" ]; then
+	BANNER=$(which figlet)
+fi
+
+[ -x "$BANNER" ] && ( $PRINT_HOSTNAME | $BANNER -f $FONT )

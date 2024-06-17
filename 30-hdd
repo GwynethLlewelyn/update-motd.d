@@ -5,9 +5,9 @@
 #date			: 20160620
 #version		: 0.1    
 #usage			: bash 30-hdd OR ./30-hdd
-#notes			: It's colorful, be aware that some apps needs to be installed, see depencies
+#notes			: It's colorful, be aware that some apps needs to be installed, see dependencies
 #bash_version	: 4.3.30(1)-release
-#depencies		: Nothing (Normal Installation)
+#dependencies	: Nothing (Normal Installation)
 #installation	: chmod +x 30-hdd | mv 30-hdd /etc/update-motd.d/30-hdd
 #license		: MIT
 #==============================================================================
