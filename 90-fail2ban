@@ -2,8 +2,8 @@
 #title			: /etc/update-motd.d/90-fail2ban
 #description	: This Script will output the today's ban statistic from Fail2ban
 #author			: SHelfinger
-#date			: 20160620
-#version		: 0.1    
+#date			: 20240618
+#version		: 0.2
 #usage			: bash 90-fail2ban OR ./90-fail2ban
 #notes			: It's colorful, be aware that some apps needs to be installed, see dependencies
 #bash_version	: 4.3.30(1)-release
@@ -24,24 +24,27 @@ MAX_ENTRIES="10"
 CRUDINI=$(which crudini)
 #Configuration END
 
+# Check if fail2ban has been installed and exit if not.
+( [ -r $JAIL_CONF ] && [ -r $FAIL2BAN_LOG ] ) || exit 0
+
 echo -en "\033[1;33mFail2Ban \033[1;32mToday's Ban \033[1;31mStatistics\033[0m\n"
 
 grep "Ban " $FAIL2BAN_LOG | grep `date +%Y-%m-%d` | awk -F[\ \:] '{print $10,$8}' | sort | awk '{print "\033[1;33m"$1,$2}' | uniq -c | while read output;
-do 
+do
     list=$(echo $output | awk '{ print $1}' | sed -e 's/^[ \t]*//')
     ip=$(echo $output | awk '{ print $2}')
     port=$(echo $output | awk '{ print $3}' | sed 's/\(\[\|\]\)//g')
-    
+
     FAIL2BAN_SSH_BANTIME=`$CRUDINI --get $JAIL_CONF $port maxretry`
-    
+
     if [ "$FAIL2BAN_SSH_BANTIME" -gt "1" ]; then
         maxretry=$FAIL2BAN_SSH_BANTIME
-    else 
+    else
         maxretry=`$CRUDINI --get $JAIL_CONF default maxretry`
     fi
     if [ "$list" -gt "$maxretry" ]; then
         echo -en $'\t'"\033[1;31m$list"$'\t'
-    else 
+    else
         echo -en $'\t'"\033[0m$list"$'\t'
     fi
     ok=1
