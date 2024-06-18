@@ -2,8 +2,8 @@
 #title			: /etc/update-motd.d/20-cpu
 #description	: This Script will output the CPU Load for each Core
 #author			: SHelfinger
-#date			: 20160620
-#version		: 0.1    
+#date			: 20240617
+#version		: 0.2
 #usage			: bash 20-cpu OR ./20-cpu
 #notes			: It's colorful, be aware that some apps needs to be installed, see dependencies
 #bash_version	: 4.3.30(1)-release
@@ -22,16 +22,22 @@ BC=$(which bc)
 PYTHON=$(which python)
 c=1
 
+# Check for python version, since raw_input() in Python 2 is now input() in Python 3
+P_INPUT="input"
+if [ $( $PYTHON --version | cut -b8 ) == 2 ]; then
+		P_INPUT="raw_input"
+fi
+
 $MPSTAT -P ALL 2 1 | sed -n '4p' | while read output;
-do 
-    user=$(echo $output | awk '{print $3}' | $PYTHON -c "from decimal import *; print(int(Decimal(raw_input()).quantize(Decimal('1.'), rounding=ROUND_UP)))")
-    nice=$(echo $output | awk '{print $4}' | $PYTHON -c "from decimal import *; print(int(Decimal(raw_input()).quantize(Decimal('1.'), rounding=ROUND_UP)))")
-    system=$(echo $output | awk '{print $5}' | $PYTHON -c "from decimal import *; print(int(Decimal(raw_input()).quantize(Decimal('1.'), rounding=ROUND_UP)))")
-    iowait=$(echo $output | awk '{print $6}' | $PYTHON -c "from decimal import *; print(int(Decimal(raw_input()).quantize(Decimal('1.'), rounding=ROUND_UP)))")
+do
+    user=$(echo $output | awk '{print $3}' | $PYTHON -c "from decimal import *; print(int(Decimal($P_INPUT()).quantize(Decimal('1.'), rounding=ROUND_UP)))")
+    nice=$(echo $output | awk '{print $4}' | $PYTHON -c "from decimal import *; print(int(Decimal($P_INPUT()).quantize(Decimal('1.'), rounding=ROUND_UP)))")
+    system=$(echo $output | awk '{print $5}' | $PYTHON -c "from decimal import *; print(int(Decimal($P_INPUT()).quantize(Decimal('1.'), rounding=ROUND_UP)))")
+    iowait=$(echo $output | awk '{print $6}' | $PYTHON -c "from decimal import *; print(int(Decimal($P_INPUT()).quantize(Decimal('1.'), rounding=ROUND_UP)))")
     idle=$(echo $output | awk '{print $12}')
     idles=$($BC <<< "100 - $idle")
-    usep=$(echo "$idles" | $PYTHON -c "from decimal import *; print(int(Decimal(raw_input()).quantize(Decimal('1.'), rounding=ROUND_UP)))")
-    
+    usep=$(echo "$idles" | $PYTHON -c "from decimal import *; print(int(Decimal($P_INPUT()).quantize(Decimal('1.'), rounding=ROUND_UP)))")
+
     echo -en "\033[1;33mCPU \033[1;32mALL \033[0m(\033[01;31mLoad\033[0m/\033[0mIdle) $BEGIN"
     all=$(($user + $nice + $system + $iowait))
     free=$((100 - $all))
@@ -45,15 +51,15 @@ do
 done
 
 $MPSTAT -P ALL | tail -n +5 | while read output;
-do 
-    user=$(echo $output | awk '{print $3}' | $PYTHON -c "from decimal import *; print(int(Decimal(raw_input()).quantize(Decimal('1.'), rounding=ROUND_UP)))")
-    nice=$(echo $output | awk '{print $4}' | $PYTHON -c "from decimal import *; print(int(Decimal(raw_input()).quantize(Decimal('1.'), rounding=ROUND_UP)))")
-    system=$(echo $output | awk '{print $5}' | $PYTHON -c "from decimal import *; print(int(Decimal(raw_input()).quantize(Decimal('1.'), rounding=ROUND_UP)))")
-    iowait=$(echo $output | awk '{print $6}' | $PYTHON -c "from decimal import *; print(int(Decimal(raw_input()).quantize(Decimal('1.'), rounding=ROUND_UP)))")
+do
+    user=$(echo $output | awk '{print $3}' | $PYTHON -c "from decimal import *; print(int(Decimal($P_INPUT()).quantize(Decimal('1.'), rounding=ROUND_UP)))")
+    nice=$(echo $output | awk '{print $4}' | $PYTHON -c "from decimal import *; print(int(Decimal($P_INPUT()).quantize(Decimal('1.'), rounding=ROUND_UP)))")
+    system=$(echo $output | awk '{print $5}' | $PYTHON -c "from decimal import *; print(int(Decimal($P_INPUT()).quantize(Decimal('1.'), rounding=ROUND_UP)))")
+    iowait=$(echo $output | awk '{print $6}' | $PYTHON -c "from decimal import *; print(int(Decimal($P_INPUT()).quantize(Decimal('1.'), rounding=ROUND_UP)))")
     idle=$(echo $output | awk '{print $12}')
     idles=$($BC <<< "100 - $idle")
-    usep=$(echo "$idles" | $PYTHON -c "from decimal import *; print(int(Decimal(raw_input()).quantize(Decimal('1.'), rounding=ROUND_UP)))")
-    
+    usep=$(echo "$idles" | $PYTHON -c "from decimal import *; print(int(Decimal($P_INPUT()).quantize(Decimal('1.'), rounding=ROUND_UP)))")
+
     echo -en "\033[1;33m     \033[1;32m$(printf %02d $c) \033[0m(\033[01;31mLoad\033[0m/\033[0mIdle) $BEGIN"
     all=$(($user + $nice + $system + $iowait))
     free=$((100 - $all))
