@@ -14,7 +14,7 @@ Non-Debian-based Linux distros and other OSes may have different ways of configu
 
 In those cases, you might wish to consult [this reference on LinuxConfig](https://linuxconfig.org/how-to-set-a-custom-message-of-the-day-on-linux) instead. You can continue to use the scripts within this repository, though; you will just need to add a single line with `run-parts /etc/update-motd.d` inside your `motd.sh`.
 
-The authors of this repository, however, have not experimented this alternative.
+The authors of this repository, however, have not experimented with this alternative configuration method.
 
 ## Downloading and installing (Debian-based Linux distros)
 
@@ -24,9 +24,9 @@ git clone https://github.com/SHelfinger/update-motd.d/ ~/
 ```
 The complete git repo will be placed inside your home folder (`cd ~/`).
 
-By default, you will already have the executable bit set on all files in that folder, but if this isn't the case, please make them executable with `chmod +x *-*`.
+By default, you will already have the executable bit set on all scripts in that folder, but if this isn't the case, please make them executable with `chmod +x *-*`.
 
-After you're done with testing each file (`./10-version`, etc.), feel free to install the ones you wish by copying them to their final destination:
+After you're done with testing each file (`./10-version`, etc.), feel free to install the ones you wish by copying them to their final destination (you might need to be root for that):
 ```shell
 cp 00-header /etc/update-motd.d/00-header
 cp 10-version /etc/update-motd.d/10-version
@@ -38,13 +38,17 @@ cp 50-systop /etc/update-motd.d/50-systop
 cp 50-lastlogin /etc/update-motd.d/50-lastlogin
 cp 90-fail2ban /etc/update-motd.d/90-fail2ban
 ```
-Again, note that non-Debian Linux, and non-Linux systems, might require a differen configuration; refer to the previous section for a short introduction.
+Again, note that non-Debian Linux, and non-Linux systems, might require a different configuration; refer to the previous section for a short introduction.
 
 ## Dependencies
 
-Note that some of those files have dependencies, such as `lm-sensors`, `bc` and [`crudini`](https://www.pixelbeat.org/programs/crudini/). Each file lists its own dependencies (beyond the [standard GNU core utilities](https://www.gnu.org/software/coreutils/) you'll also need `awk`, `grep`, `sed`, etc.) — make sure you install them all first (or skip the file if you don't want some of the functionality).
+Note that some of those files have dependencies, such as `lm-sensors`, `bc` and [`crudini`](https://www.pixelbeat.org/programs/crudini/). Each file lists its own dependencies (beyond the [standard GNU Core Utilities](https://www.gnu.org/software/coreutils/) you'll also need `awk`, `grep`, `sed`, etc.) — make sure you install them all first (or skip the file if you don't want some of the functionality).
+
+All should be easily available on practically all Debian/Ubuntu derivatives.
 
 Some of the files use Python for short one-liners. Python 2 is assumed, but some tweaks have been made to allow the scripts to run under Python 3 as well.
+
+In general, the authors have assumed that this set of scripts will be used under Debian/Ubuntu or one of its direct derivatives. It is also slightly biased towards Intel-based servers (although some scripts have been modified to support the ARM architecture as well). Some of
 
 ## Integration with `sshd` and `pam.d`
 
@@ -133,6 +137,10 @@ Screenshot:
 ### 10-version
 This script will output the Distribution and its Version Number (Code name, Kernel, Architecture)
 
+It relies on `uname` (which is almost universal under all Unixes) but some architectures also require `crudini` to be installed.
+
+Currently, only SunOS, AIX, and several Linux distributions are properly recognised and parsed (with more or less detail depending on distro). Other Unixes (e.g., FreeBSD, Darwin) will not display anything (WiP). 
+
 Debian output:
 ```shell
 Linux Debian 8.5 (jessie 4.4.8-1-pve x86_64)
@@ -142,9 +150,9 @@ Screenshot:
 
 ---
 ### 20-cpu
-This script will output each core's load in percentage, including the total load. The histogram is User, Nice, System, I/O Wait and Free).
+This script will output each core's load in percentage, including the total load, as a coloured histogram, displaying the following fields: **User**, **Nice**, **System**, **I/O Wait** and **Free**.
 
-It relies on the ubiquitous `bc`, `grep`, Python 2 (but including a small patch allowing Python 3 to be used) but also on `mpstat`.
+It relies on the ubiquitous `bc`, `grep`, Python 2 (but including a small patch allowing Python 3 to be used) but also on [`mpstat`](https://sysstat.github.io/).
 
 Debian output:
 ```shell
@@ -164,9 +172,9 @@ Screenshot:
 
 ---
 ### 21-temp
-This script will output the current temperature(s) in all the cores (in degrees Celsius). Remember that Intel i7 doesn't really have 8 cores — it has 4 cores and 4 siblings — see `cat /proc/cpuinfo`. Similarly, the very small ARM chips may just have a single, so-called "virtual" temperature sensor, which is measured for all cores and subsystems inside the chip.
+This script will output the current temperature(s) in all the cores (in degrees Celsius). Remember that Intel i7 doesn't really have 8 cores — it has 4 cores and 4 siblings — see `cat /proc/cpuinfo`. Similarly, the very small ARM chips may just have a single, so-called "virtual" temperature sensor, which measures all cores and subsystems inside the chip.
 
-It depends on the `lm-sensors` package to be installed (which will include an executable named `sensors`) and attempts to parse the output in order to display it with different colours, depending on how close the temperature is to the critical limit (future versions might rely on the JSON output instead, which should be more stable and easy to extract, at the cost of requiring `jq` as a pre-requisite or a similar JSON processor).
+It depends on the [`lm-sensors`](https://hwmon.wiki.kernel.org/) package to be installed (which will include an executable named `sensors`) and attempts to parse the output in order to display it with different colours, depending on how close the temperature is to the critical limit (future versions might rely on the JSON output instead, which should be more stable and easy to extract, at the cost of requiring [`jq`](https://jqlang.github.io/) or a similar JSON processor as a pre-requisite; WiP).
 
 Debian output: 
 ```shell
@@ -177,7 +185,7 @@ Screenshot:
 
 ---
 ### 30-hdd
-This script will output a usage/free histogram for all hard disks found in the system (as well as a percentage). Note that some Unix variants may display all filesystems instead of just the actual hard disks (i.e., including remotely mounted systems); the script tries to figure out the more popular device names and just show statistics for those, but some errors may occur on certain hardware.
+This script will output a usage/free histogram for all hard disks found in the system (as well as displaying the percentages). Note that some Unix variants may display all filesystems instead of just the actual hard disks (i.e., including remotely mounted systems); the script tries to figure out the more popular device names and just show statistics for those, but some errors may occur on certain hardware.
 
 Actual information is retrieved using the `df` command, which is part of the GNU Core Utilities.
 
@@ -194,7 +202,7 @@ Screenshot:
 ### 40-memory
 This script will output the current system memory usage (User, Buffers, System and Cache).
 
-It only depends on the availability of `bc` ('the **b**asic **c**alculator') to aid in some of the calculations and of `free` to display the actual memory usage.
+It only depends on the availability of `bc` ('the **b**asic **c**alculator') to aid in some of the calculations and on `free` to display the actual memory usage.
 
 Debian output:
 ```shell
@@ -209,7 +217,7 @@ Screenshot:
 ### 50-systop
 This script will output your system network information (Hostname, DNS, FQDN and IP).
 
-It does not require any dependencis.
+It does not have any dependencies.
 
 
 Debian output:
@@ -222,7 +230,7 @@ Screenshot:
 
 ---
 ### 60-lastlogin
-This script will output the last login access and current IP for this session.
+This script will output last login access (IP address and time) as well as the current IP for this session.
 
 It just uses very common text-processing utilities (`head` and `tail`, both available on the GNU Core Utilities, plus `awk` and `sed`) as well as the `last` command-line utility to retrieve a list of recent logins.
 

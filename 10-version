@@ -14,7 +14,8 @@
 OS=`uname -s`
 MACH=`uname -m`
 CRUDINI=$(which crudini)
-VERSION_REGULAR_EXPRESSION="^[0-9]+([.][0-9]+)?$"
+# unused? (gwyneth 20240618)
+# VERSION_REGULAR_EXPRESSION="^[0-9]+([.][0-9]+)?$"
 
 if [ "${OS}" = "SunOS" ] ; then
 	OS=Solaris
