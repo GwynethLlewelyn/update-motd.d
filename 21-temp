@@ -3,7 +3,7 @@
 #description	: This Script will output the CPU Temp for each Core
 #author			: SHelfinger
 #date			: 20160620
-#version		: 0.1    
+#version		: 0.2
 #usage			: bash 21-temp OR ./21-temp
 #notes			: It's colorful, be aware that some apps needs to be installed, see dependencies
 #bash_version	: 4.3.30(1)-release
@@ -13,6 +13,25 @@
 #==============================================================================
 SENSORS=$(which sensors)
 i=1
+
+# See if sensors is installed, exit otherwise
+[ -z $SENSORS ] && exit
+
+# Check if we have real-deal Intel cores or pseudo-virtual ARM cores:
+CHECK_WORD="Core "
+if [ ! $( $SENSORS | grep -i core ) ]; then
+	CHECK_WORD="temp"
+fi
+
+# awk on demand
+#was
+#EXTRACT_TEMP='{print $3"\t"$7"\t"$11}'
+# For Ubuntu:
+EXTRACT_TEMP='{print $3"\t"$6"\t"$9}'
+# For ARM:
+if [ $CHECK_WORD == "temp" ]; then
+	EXTRACT_TEMP='{print $2"\t"$5"\t"$5}'
+fi
 
 getStyle () {
 	if [ "$1" -ge "$3" ]; then
@@ -27,8 +46,8 @@ getStyle () {
     echo -en "\033[0mCore$4: $tempcolor$1° "
 }
 
-$SENSORS | grep Core | tr -d '(),' | awk '{print $3"\t"$7"\t"$11}' | while read output;
-do 
+$SENSORS | grep "$CHECK_WORD" | tr -d '(),' | awk "$EXTRACT_TEMP" | while read output;
+do
 	NormalTemp=$(echo $output | awk '{print $1}' | cut -f1 -d"." | tr -dc '[:alnum:]\n\r')
     HighTemp=$(echo $output | awk '{print $2}' | cut -f1 -d"." | tr -dc '[:alnum:]\n\r')
     CritTemp=$(echo $output | awk '{print $3}' | cut -f1 -d"." | tr -dc '[:alnum:]\n\r')
