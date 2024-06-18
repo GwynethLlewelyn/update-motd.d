@@ -2,12 +2,12 @@
 #title			: /etc/update-motd.d/10-version
 #description	: This Script will output the linux version
 #author			: SHelfinger
-#date			: 20160620
-#version		: 0.1    
+#date			: 20240617
+#version		: 0.2
 #usage			: bash 10-version OR ./10-version
 #notes			: It's colorful, be aware that some apps needs to be installed, see dependencies
 #bash_version	: 4.3.30(1)-release
-#dependencies	: Nothing (Normal Installation)
+#dependencies	: crudini (sudo apt-get install crudini)
 #installation	: chmod +x 10-version | mv 10-version /etc/update-motd.d/10-version
 #license		: GPLv3
 #==============================================================================
@@ -18,7 +18,7 @@ VERSION_REGULAR_EXPRESSION="^[0-9]+([.][0-9]+)?$"
 
 if [ "${OS}" = "SunOS" ] ; then
 	OS=Solaris
-	ARCH=`uname -p`	
+	ARCH=`uname -p`
 	OSSTR="${OS} ${REV}(${ARCH} `uname -v`)"
 elif [ "${OS}" = "AIX" ] ; then
 	OSSTR="${OS} `oslevel` (`oslevel -r`)"
@@ -27,26 +27,26 @@ elif [ "${OS}" = "Linux" ] ; then
     if [ -f /etc/lsb-release ] ; then
     	DIST=`$CRUDINI --get --format=sh /etc/lsb-release "" DISTRIB_ID | tr -d 'DISTRIB_ID="'`
         REV=`$CRUDINI --get --format=sh /etc/lsb-release "" DISTRIB_RELEASE | tr -d 'DISTRIB_RELEASE="'`
-        PSUEDONAME=`$CRUDINI --get --format=sh /etc/lsb-release "" DISTRIB_CODENAME | tr -d 'DISTRIB_CODENAME="'`
+        PSEUDONAME=`$CRUDINI --get --format=sh /etc/lsb-release "" DISTRIB_CODENAME | tr -d 'DISTRIB_CODENAME="'`
 	elif [ -f /etc/redhat-release ] ; then
 		DIST=`cat /etc/redhat-release | awk '{print $1}'`
 		REV=`cat /etc/redhat-release | sed s/.*release\ // | sed s/\ .*//`
-		PSUEDONAME=`cat /etc/redhat-release | sed s/.*\(// | sed s/\)//`
+		PSEUDONAME=`cat /etc/redhat-release | sed s/.*\(// | sed s/\)//`
 	elif [ -f /etc/SUSE-release ] ; then
 		DIST=`cat /etc/SUSE-release | tr "\n" ' '| sed s/VERSION.*//`
 		REV=`cat /etc/SUSE-release | tr "\n" ' ' | sed s/.*=\ //`
 	elif [ -f /etc/mandrake-release ] ; then
 		DIST='Mandrake'
 		REV=`cat /etc/mandrake-release | sed s/.*release\ // | sed s/\ .*//`
-		PSUEDONAME=`cat /etc/mandrake-release | sed s/.*\(// | sed s/\)//`
+		PSEUDONAME=`cat /etc/mandrake-release | sed s/.*\(// | sed s/\)//`
 	elif [ -f /etc/debian_version ] ; then
 		DIST="Debian"
 		REV=`cat /etc/debian_version`
-        PSUEDONAME=`dpkg --status tzdata|grep Provides|cut -f2 -d'-'`
+        PSEUDONAME=`dpkg --status tzdata|grep Provides|cut -f2 -d'-'`
 	fi
 	if [ -f /etc/UnitedLinux-release ] ; then
 		DIST="${DIST}[`cat /etc/UnitedLinux-release | tr "\n" ' ' | sed s/VERSION.*//`]"
 	fi
-	OSSTR="\033[1;32m${OS} \033[1;31m${DIST} \033[1;33m${REV} \033[0m(\033[1;34m${PSUEDONAME} \033[1;37m${KERNEL} \033[1;36m${MACH}\033[0m)"
+	OSSTR="\033[1;32m${OS} \033[1;31m${DIST} \033[1;33m${REV} \033[0m(\033[1;34m${PSEUDONAME} \033[1;37m${KERNEL} \033[1;36m${MACH}\033[0m)"
 fi
 echo -e ${OSSTR}
